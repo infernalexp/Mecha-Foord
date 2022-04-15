@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { Interaction } from "discord.js";
 import { Bot } from "../Bot";
 import { getChildLogger, LoggerInterface, Promised } from "../util/Util";
 
@@ -12,7 +12,7 @@ export abstract class Command {
     this.logger = getChildLogger(client.getLogger(), this.constructor.name, 35, 90);
   }
 
-  abstract exec(interaction: CommandInteraction): Promised<void>;
+  abstract exec(interaction: Interaction): Promised<void>;
   abstract getName(): string;
   abstract getCommandBuilder(): Promised<Pick<SlashCommandBuilder, "toJSON">>;
 }

@@ -42,7 +42,7 @@ export class Bot extends Client {
     });
 
     this.on("interactionCreate", interaction => {
-      if (interaction.isCommand()) {
+      if (interaction.isCommand() || interaction.isMessageContextMenu()) {
         try {
           this.commands.find(command => command.getName() === interaction.commandName)?.exec(interaction);
         } catch (err) {

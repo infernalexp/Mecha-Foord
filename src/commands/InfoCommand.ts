@@ -87,6 +87,7 @@ export class InfoCommand extends Command {
   }
 
   public override async exec(interaction: CommandInteraction): Promise<void> {
+    if (!interaction.isCommand()) return;
     interaction.reply({
       embeds: [
         interaction.options.getBoolean("dependencies", false) ? this.getDependencyEmbed() : this.getDefaultEmbed(),

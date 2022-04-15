@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
 import chalk from "chalk";
-import { ColorResolvable, CommandInteraction, MessageAttachment, MessageEmbed } from "discord.js";
+import { ColorResolvable, Interaction, MessageAttachment, MessageEmbed } from "discord.js";
 import ffmpegPath from "ffmpeg-static";
 import { createReadStream, createWriteStream, ensureDir } from "fs-extra";
 import path from "path";
@@ -10,7 +10,7 @@ import { getResource } from "../util/HttpUtil";
 import { asyncPipe, asyncProcess, fileExists, fileSize, hash } from "../util/Util";
 import { Command } from "./Command";
 
-export class ToGifCommand extends Command {
+export class ToGifSlashCommand extends Command {
   public constructor(client: Bot) {
     super(client);
   }
@@ -19,7 +19,9 @@ export class ToGifCommand extends Command {
     return "togif";
   }
 
-  public override async exec(interaction: CommandInteraction): Promise<void> {
+  public override async exec(interaction: Interaction): Promise<void> {
+    if (!interaction.isCommand()) return;
+
     const reply = new UpdatableReply(
       interaction,
       data => {
@@ -129,6 +131,10 @@ export class ToGifCommand extends Command {
     }
 
     url = url.trim();
+    await this.processUrl(url, reply);
+  }
+
+  protected async processUrl(url: string, reply: UpdatableReply) {
     reply.setData("title", `Downloading video...`);
     reply.setData("description", "");
     reply.addDataLine("log", `URL: ${url}`);

@@ -1,7 +1,12 @@
-import { CommandInteraction, MessagePayload, WebhookEditMessageOptions } from "discord.js";
+import {
+  CommandInteraction,
+  MessageContextMenuInteraction,
+  MessagePayload,
+  WebhookEditMessageOptions,
+} from "discord.js";
 
 export class UpdatableReply {
-  private interaction: CommandInteraction;
+  private interaction: MessageContextMenuInteraction | CommandInteraction;
   private intervalMs: number;
   private interval!: NodeJS.Timeout;
   private shouldUpdate: boolean = false;
@@ -12,7 +17,7 @@ export class UpdatableReply {
   private data: Record<string, string> = {};
 
   public constructor(
-    interaction: CommandInteraction,
+    interaction: MessageContextMenuInteraction | CommandInteraction,
     messageBuilder: (
       this: UpdatableReply,
       data: Record<string, string>

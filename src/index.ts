@@ -6,7 +6,8 @@ import { cpus, totalmem } from "os";
 import path from "path";
 import { Bot } from "./Bot";
 import { InfoCommand } from "./commands/InfoCommand";
-import { ToGifCommand } from "./commands/ToGifCommand";
+import { ToGifMessageCommand } from "./commands/ToGifMessageCommand";
+import { ToGifSlashCommand } from "./commands/ToGifSlashCommand";
 import { formatBytes } from "./util/Util";
 
 void (async function main() {
@@ -44,7 +45,7 @@ void (async function main() {
     logger,
   });
 
-  client.addCommand(new InfoCommand(client), new ToGifCommand(client));
+  client.addCommand(new InfoCommand(client), new ToGifSlashCommand(client), new ToGifMessageCommand(client));
 
   client.login(process.env.DISCORD_API_KEY);
 
