@@ -1,0 +1,71 @@
+{
+  "name": "mecha-foord",
+  "version": "1.1.3",
+  "private": true,
+  "description": "Mecha Foord is a custom Discord bot for Infernal Studios!",
+  "bugs": "https://github.com/infernalexp/Mecha-Foord/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/infernalexp/Mecha-Foord.git"
+  },
+  "license": "ARR",
+  "author": {
+    "name": "Infernal Studios",
+    "email": "contact@infernalstudios.org",
+    "url": "https://infernalstudios.org"
+  },
+  "contributors": [
+    {
+      "name": "Kārlis Čerņavskis",
+      "email": "karliscern@gmail.com",
+      "url": "https://cernavskis.dev"
+    }
+  ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "yarn build:only",
+    "build:only": "tsc",
+    "build:noemit": "yarn build --noEmit",
+    "build:watch": "tsc -w",
+    "format:check": "prettier --config .prettierrc.json --check src *.json .*.json *.js",
+    "format": "prettier --config .prettierrc.json --write src *.json .*.json *.js",
+    "prebuild": "yarn format:check",
+    "prepare": "husky install",
+    "start": "node .",
+    "start:dev": "nodemon --delay 2 -w \"dist\" -x \"clear && yarn start\" & yarn build:watch"
+  },
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "bufferutil": "^4.0.6",
+    "chalk": "^4",
+    "discord-api-types": "^0.31.1",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "erlpack": "^0.1.4",
+    "ffmpeg-static": "^5.0.0",
+    "fs-extra": "^10.0.1",
+    "gl": "^5.0.0",
+    "logerian": "^1.2.2",
+    "mime2ext": "^2.0.0",
+    "sqlite3": "^5.0.3",
+    "utf-8-validate": "^5.0.9",
+    "zlib-sync": "^0.1.7"
+  },
+  "devDependencies": {
+    "@types/ffmpeg-static": "^3.0.1",
+    "@types/fs-extra": "^9.0.13",
+    "@types/gl": "^4.1.0",
+    "@types/node": "^16",
+    "@types/sqlite3": "^3.1.8",
+    "husky": "^7.0.4",
+    "prettier": "^2.4.1",
+    "prettier-package-json": "^2.6.3",
+    "prettier-plugin-organize-imports": "^2.3.4",
+    "typescript": "~4.7.0-dev.20220408"
+  },
+  "engines": {
+    "node": "^16.0.0",
+    "yarn": "^1.22.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules
+dist
+log
+data.sqlite
+.env
+.vscode
+cache
+exported

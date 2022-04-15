@@ -1,0 +1,118 @@
+name: CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Use Node.js v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Get Yarn Cache Directory Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Get Cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build Code
+        run: yarn build:only
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Use Node.js v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Get Yarn Cache Directory Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Get Cache
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Check Format
+        run: yarn format:check
+
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v2
+
+  #     - name: Use Node.js v16
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: "16.x"
+  #         registry-url: "https://registry.npmjs.org"
+
+  #     - name: Get Yarn Cache Directory Path
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+
+  #     - name: Get Cache
+  #       uses: actions/cache@v2
+  #       id: yarn-cache
+  #       with:
+  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-yarn-
+
+  #     - name: Install dependencies
+  #       run: yarn
+
+  #     - name: Lint Code
+  #       run: yarn lint
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, format]
+    steps:
+      - name: Get temporary file
+        id: mktemp
+        run: echo "::set-output name=tempfile::`mktemp`"
+      - name: Write SSH key to temporary file
+        run: echo "${{ secrets.SSH_KEY }}" > ${{ steps.mktemp.outputs.tempfile }}
+      - name: Deploy
+        run: |
+          ssh \
+          -l ${{ secrets.SSH_USER }} \
+          -i ${{ steps.mktemp.outputs.tempfile }} \
+          -o "StrictHostKeyChecking=accept-new" \
+          ${{ secrets.SSH_HOST }} \
+          "
+            ${{ secrets.SSH_COMMAND }}
+          "
