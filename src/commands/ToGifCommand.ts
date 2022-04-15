@@ -90,6 +90,44 @@ export class ToGifCommand extends Command {
       return;
     }
 
+    const urlObject = new URL(url);
+    if (urlObject.hostname === "discord.com" && urlObject.pathname.startsWith("/channels/" + interaction.guildId)) {
+      reply.addDataLine("log", "Resolving message URL");
+      reply.update();
+      const [channelId, messageId] = urlObject.pathname.split("/").slice(-2);
+      let channel = await this.client.channels.fetch(channelId).catch(() => {});
+      if (channel?.isText()) {
+        const message = await channel.messages.fetch(messageId).catch(() => {});
+        if (!message) {
+          reply.addDataLine("log", "Message not found");
+          reply.setData("state", "error");
+          reply.setData("title", "Message not found");
+          reply.setData("description", "Message not found");
+          reply.update();
+          reply.close();
+          return;
+        }
+        if (message.attachments.size > 0) {
+          for (const attachment of message.attachments.values()) {
+            if (attachment.contentType?.startsWith("video/") ?? true) {
+              reply.addDataLine("log", `Using video from message ${message.id}`);
+              reply.update();
+              url = attachment.url;
+              break;
+            }
+          }
+        }
+      } else {
+        reply.addDataLine("log", "Text channel not found");
+        reply.setData("state", "error");
+        reply.setData("title", "Text channel not found");
+        reply.setData("description", "Text channel not found.");
+        reply.update();
+        reply.close();
+        return;
+      }
+    }
+
     url = url.trim();
     reply.setData("title", `Downloading video...`);
     reply.setData("description", "");
@@ -145,16 +183,26 @@ export class ToGifCommand extends Command {
       reply.update();
       exitCode = 0;
     } else {
-      exitCode = await asyncProcess(ffmpegPath, [
-        "-filter_complex",
-        "[0:v] split [a][b];[a] palettegen=stats_mode=single [p];[b][p] paletteuse=new=1",
-        "-i",
-        infile,
-        "-f",
-        "gif",
-        "-y",
-        outfile,
-      ]);
+      const out = path.join(__dirname, `../../log/${new Date().toISOString()}_ffmpeg_out.txt`);
+      const err = path.join(__dirname, `../../log/${new Date().toISOString()}_ffmpeg_err.txt`);
+      this.logger.debug(chalk`Writing FFMPEG output to {yellow ${path.relative(process.cwd(), out)}}`);
+      this.logger.debug(chalk`Writing FFMPEG errors to {yellow ${path.relative(process.cwd(), err)}}`);
+
+      exitCode = await asyncProcess(
+        ffmpegPath,
+        [
+          "-filter_complex",
+          "[0:v] split [a][b];[a] palettegen=stats_mode=single [p];[b][p] paletteuse=new=1",
+          "-i",
+          infile,
+          "-f",
+          "gif",
+          "-y",
+          outfile,
+        ],
+        createWriteStream(out),
+        createWriteStream(err)
+      );
     }
 
     if (exitCode === 0) {

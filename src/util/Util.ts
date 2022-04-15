@@ -224,9 +224,22 @@ export function asyncPipe(readable: NodeJS.ReadableStream, writable: NodeJS.Writ
   });
 }
 
-export async function asyncProcess(command: string, args: string[]): Promise<number> {
+export async function asyncProcess(
+  command: string,
+  args: string[],
+  outStream?: NodeJS.WritableStream,
+  errStream?: NodeJS.WritableStream
+): Promise<number> {
   return new Promise((resolve, reject) => {
-    const process = spawn(command, args, { stdio: ["ignore", "ignore", "ignore"] });
+    const process = spawn(command, args, {
+      stdio: ["ignore", outStream ? "pipe" : "ignore", errStream ? "pipe" : "ignore"],
+    });
+    if (outStream) {
+      process.stdout?.pipe(outStream);
+    }
+    if (errStream) {
+      process.stderr?.pipe(errStream);
+    }
     process.on("error", reject);
     process.on("exit", (code: number) => {
       resolve(code);
