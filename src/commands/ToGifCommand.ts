@@ -192,7 +192,7 @@ export class ToGifCommand extends Command {
         ffmpegPath,
         [
           "-filter_complex",
-          "[0:v] split [a][b];[a] palettegen=stats_mode=single [p];[b][p] paletteuse=new=1",
+          "[0:v] split [a][b];[a] palettegen=stats_mode=diff [p];[b][p] paletteuse=bayer_scale=1",
           "-i",
           infile,
           "-f",
