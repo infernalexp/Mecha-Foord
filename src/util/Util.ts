@@ -231,17 +231,17 @@ export async function asyncProcess(
   errStream?: NodeJS.WritableStream
 ): Promise<number> {
   return new Promise((resolve, reject) => {
-    const process = spawn(command, args, {
+    const child = spawn(command, args, {
       stdio: ["ignore", outStream ? "pipe" : "ignore", errStream ? "pipe" : "ignore"],
     });
     if (outStream) {
-      process.stdout?.pipe(outStream);
+      child.stdout?.pipe(outStream);
     }
     if (errStream) {
-      process.stderr?.pipe(errStream);
+      child.stderr?.pipe(errStream);
     }
-    process.on("error", reject);
-    process.on("exit", (code: number) => {
+    child.on("error", reject);
+    child.on("exit", (code: number) => {
       resolve(code);
     });
   });

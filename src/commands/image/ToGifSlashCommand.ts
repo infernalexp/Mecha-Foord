@@ -4,11 +4,11 @@ import { ColorResolvable, Interaction, MessageAttachment, MessageEmbed } from "d
 import ffmpegPath from "ffmpeg-static";
 import { createReadStream, createWriteStream, ensureDir } from "fs-extra";
 import path from "path";
-import { Bot } from "../Bot";
-import { UpdatableReply } from "../UpdatableReply";
-import { getResource } from "../util/HttpUtil";
-import { asyncPipe, asyncProcess, fileExists, fileSize, hash } from "../util/Util";
-import { Command } from "./Command";
+import { Bot } from "../../Bot";
+import { UpdatableReply } from "../../UpdatableReply";
+import { getResource } from "../../util/HttpUtil";
+import { asyncPipe, asyncProcess, fileExists, fileSize, hash } from "../../util/Util";
+import { Command } from ".././Command";
 
 export class ToGifSlashCommand extends Command {
   public constructor(client: Bot) {
@@ -189,8 +189,8 @@ export class ToGifSlashCommand extends Command {
       reply.update();
       exitCode = 0;
     } else {
-      const out = path.join(__dirname, `../../log/${new Date().toISOString()}_ffmpeg_out.txt`);
-      const err = path.join(__dirname, `../../log/${new Date().toISOString()}_ffmpeg_err.txt`);
+      const out = path.join(__dirname, `../../../log/${new Date().toISOString()}_ffmpeg_out.txt`);
+      const err = path.join(__dirname, `../../../log/${new Date().toISOString()}_ffmpeg_err.txt`);
       this.logger.debug(chalk`Writing FFMPEG output to {yellow ${path.relative(process.cwd(), out)}}`);
       this.logger.debug(chalk`Writing FFMPEG errors to {yellow ${path.relative(process.cwd(), err)}}`);
 
@@ -241,7 +241,7 @@ export class ToGifSlashCommand extends Command {
     }
   }
 
-  public override async getCommandBuilder(): Promise<Pick<SlashCommandBuilder, "toJSON">> {
+  public override async init(): Promise<void> {
     if (!process.env.CACHED_FILE_DIR) {
       throw new Error("CACHED_FILE_DIR is not set");
     }
@@ -258,7 +258,9 @@ export class ToGifSlashCommand extends Command {
       ensureDir(process.env.CACHED_FILE_DIR as string),
       ensureDir(process.env.EXPORTED_FILE_DIR as string),
     ]);
+  }
 
+  public override getCommandBuilder(): Pick<SlashCommandBuilder, "toJSON"> {
     return new SlashCommandBuilder()
       .setName(this.getName())
       .setDescription("Creates a gif from the given video")

@@ -77,6 +77,18 @@ export class Bot extends Client {
     >[] = [];
     for (const command of this.commandQueue) {
       this.logger.debug(chalk`Building command {yellow ${command.getName()}}`);
+      try {
+        await command.init();
+      } catch (err) {
+        if (!(err instanceof Error)) {
+          throw err;
+        }
+        this.logger.error(chalk`Couldn't initialize command {yellow ${command.getName()}}: {red ${err.message}}`);
+        if (err.stack) {
+          err.stack.split("\n").forEach((line, index) => index && this.logger.error(line)); // Skips index == 0
+        }
+        break;
+      }
       const builderPromise = command.getCommandBuilder();
       if (builderPromise instanceof Promise) {
         builderPromises.push(

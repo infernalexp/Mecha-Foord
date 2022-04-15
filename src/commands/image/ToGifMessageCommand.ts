@@ -2,8 +2,8 @@ import { ContextMenuCommandBuilder, SlashCommandBuilder } from "@discordjs/build
 import chalk from "chalk";
 import { ColorResolvable, Interaction, Message, MessageAttachment, MessageEmbed } from "discord.js";
 import { createReadStream, ensureDir } from "fs-extra";
-import { Bot } from "../Bot";
-import { UpdatableReply } from "../UpdatableReply";
+import { Bot } from "../../Bot";
+import { UpdatableReply } from "../../UpdatableReply";
 import { ToGifSlashCommand } from "./ToGifSlashCommand";
 
 export class ToGifMessageCommand extends ToGifSlashCommand {
@@ -90,7 +90,7 @@ export class ToGifMessageCommand extends ToGifSlashCommand {
     }
   }
 
-  public override async getCommandBuilder(): Promise<Pick<SlashCommandBuilder, "toJSON">> {
+  public override async init(): Promise<void> {
     if (!process.env.CACHED_FILE_DIR) {
       throw new Error("CACHED_FILE_DIR is not set");
     }
@@ -107,7 +107,9 @@ export class ToGifMessageCommand extends ToGifSlashCommand {
       ensureDir(process.env.CACHED_FILE_DIR as string),
       ensureDir(process.env.EXPORTED_FILE_DIR as string),
     ]);
+  }
 
+  public override getCommandBuilder(): Pick<SlashCommandBuilder, "toJSON"> {
     return new ContextMenuCommandBuilder().setName(this.getName()).setDefaultPermission(true).setType(3);
   }
 }

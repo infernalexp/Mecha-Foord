@@ -14,5 +14,6 @@ export abstract class Command {
 
   abstract exec(interaction: Interaction): Promised<void>;
   abstract getName(): string;
+  public init(): Promised<void> {}
   abstract getCommandBuilder(): Promised<Pick<SlashCommandBuilder, "toJSON">>;
 }

@@ -5,9 +5,11 @@ import { coloredLog, getLoggerLevelName, Logger, LoggerLevel } from "logerian";
 import { cpus, totalmem } from "os";
 import path from "path";
 import { Bot } from "./Bot";
+import { GayCommand } from "./commands/image/GayCommand";
+import { GrayscaleCommand } from "./commands/image/GrayscaleCommand";
+import { ToGifMessageCommand } from "./commands/image/ToGifMessageCommand";
+import { ToGifSlashCommand } from "./commands/image/ToGifSlashCommand";
 import { InfoCommand } from "./commands/InfoCommand";
-import { ToGifMessageCommand } from "./commands/ToGifMessageCommand";
-import { ToGifSlashCommand } from "./commands/ToGifSlashCommand";
 import { formatBytes } from "./util/Util";
 
 void (async function main() {
@@ -45,7 +47,13 @@ void (async function main() {
     logger,
   });
 
-  client.addCommand(new InfoCommand(client), new ToGifSlashCommand(client), new ToGifMessageCommand(client));
+  client.addCommand(
+    new GayCommand(client),
+    new GrayscaleCommand(client),
+    new InfoCommand(client),
+    new ToGifMessageCommand(client),
+    new ToGifSlashCommand(client)
+  );
 
   client.login(process.env.DISCORD_API_KEY);
 
