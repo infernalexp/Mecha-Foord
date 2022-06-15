@@ -2,6 +2,8 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import { createWriteStream, ensureFile } from "fs-extra";
 import { coloredLog, getLoggerLevelName, Logger, LoggerLevel } from "logerian";
+import low from "lowdb";
+import FileAsync from "lowdb/adapters/FileAsync";
 import { cpus, totalmem } from "os";
 import path from "path";
 import { Bot } from "./Bot";
@@ -10,6 +12,8 @@ import { GrayscaleCommand } from "./commands/image/GrayscaleCommand";
 import { ToGifMessageCommand } from "./commands/image/ToGifMessageCommand";
 import { ToGifSlashCommand } from "./commands/image/ToGifSlashCommand";
 import { InfoCommand } from "./commands/InfoCommand";
+import { ReminderCommand } from "./commands/ReminderCommand";
+import { DatabaseSchema } from "./DatabaseSchema";
 import { formatBytes } from "./util/Util";
 
 void (async function main() {
@@ -41,10 +45,21 @@ void (async function main() {
   logger.info(chalk`CPUs\t{yellow ${cpus().length}}`);
   logger.info(chalk`Memory\t{yellow ${formatBytes(totalmem())}}`);
 
+  logger.info("Loading database...");
+  const databaseFile = new FileAsync<DatabaseSchema>(path.join(__dirname, "../database.json"));
+  const database = await low(databaseFile);
+  try {
+    await database.read();
+  } catch (err) {
+    logger.error("Error loading database:", err);
+    process.exit(1);
+  }
+
   const client = new Bot({
     // database: new Database(path.join(__dirname, "../database.json"), logger),
     intents: ["GUILDS", "GUILD_INTEGRATIONS", "GUILD_MESSAGES"],
     logger,
+    database,
   });
 
   client.addCommand(
@@ -52,7 +67,8 @@ void (async function main() {
     new GrayscaleCommand(client),
     new InfoCommand(client),
     new ToGifMessageCommand(client),
-    new ToGifSlashCommand(client)
+    new ToGifSlashCommand(client),
+    new ReminderCommand(client)
   );
 
   client.login(process.env.DISCORD_API_KEY);

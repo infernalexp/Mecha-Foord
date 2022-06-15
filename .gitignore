@@ -6,3 +6,4 @@ data.sqlite
 .vscode
 cache
 exported
+database.json

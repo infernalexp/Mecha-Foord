@@ -1,11 +1,14 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import chalk from "chalk";
 import { Client, ClientOptions as DiscordClientOptions, MessageEmbed } from "discord.js";
+import { LowdbAsync } from "lowdb";
 import { Command } from "./commands/Command";
+import { DatabaseSchema } from "./DatabaseSchema";
 import { getChildLogger, isHeartbeatLog, LoggerInterface, registerSlashCommands, setupRestClient } from "./util/Util";
 
 export interface ClientOptions extends DiscordClientOptions {
   logger?: LoggerInterface;
+  database: LowdbAsync<DatabaseSchema>;
 }
 
 export class Bot extends Client {
@@ -13,9 +16,12 @@ export class Bot extends Client {
   private loggedIn: boolean = false;
   private commandQueue: Command[] = [];
   private logger: LoggerInterface = this.setLogger();
+  private database: LowdbAsync<DatabaseSchema>;
 
   public constructor(options: ClientOptions) {
     super(options);
+
+    this.database = options.database;
 
     this.setLogger(options.logger);
 
@@ -165,5 +171,9 @@ export class Bot extends Client {
 
   public getLogger(): LoggerInterface {
     return this.logger;
+  }
+
+  public getDatabase(): LowdbAsync<DatabaseSchema> {
+    return this.database;
   }
 }
