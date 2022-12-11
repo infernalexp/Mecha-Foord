@@ -77,6 +77,7 @@ export interface LoggerInterface {
   fatal(...data: any[]): void;
 }
 
+export type ArrayOnly<T> = T extends Array<any> ? T : T extends any[] ? T : never;
 export type Promised<T> = T | Promise<T>;
 
 interface PackageJSON {

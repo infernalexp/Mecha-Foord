@@ -4,15 +4,28 @@ import { Client, ClientOptions as DiscordClientOptions, MessageEmbed } from "dis
 import { LowdbAsync } from "lowdb";
 import { Command } from "./commands/Command";
 import { DatabaseSchema } from "./DatabaseSchema";
-import { getChildLogger, isHeartbeatLog, LoggerInterface, registerSlashCommands, setupRestClient } from "./util/Util";
+import { Task } from "./tasks/Task";
+import {
+  ArrayOnly as PickArray,
+  getChildLogger,
+  isHeartbeatLog,
+  LoggerInterface,
+  registerSlashCommands,
+  setupRestClient,
+} from "./util/Util";
 
 export interface ClientOptions extends DiscordClientOptions {
   logger?: LoggerInterface;
   database: LowdbAsync<DatabaseSchema>;
 }
 
+interface DeterminedTask extends Task {
+  type: PickArray<Task["type"]>;
+}
+
 export class Bot extends Client {
   private commands: Command[] = [];
+  private tasks: DeterminedTask[] = [];
   private loggedIn: boolean = false;
   private commandQueue: Command[] = [];
   private logger: LoggerInterface = this.setLogger();
@@ -43,8 +56,29 @@ export class Bot extends Client {
       }
     });
 
+    this.on("messageCreate", message => {
+      for (const task of this.tasks) {
+        if (task.type.includes("messageCreate")) {
+          task.run(this, "messageCreate", message);
+        }
+      }
+    });
+
+    this.on("threadCreate", (thread, newlyCreated) => {
+      for (const task of this.tasks) {
+        if (task.type.includes("threadCreate")) {
+          task.run(this, "threadCreate", thread, newlyCreated);
+        }
+      }
+    });
+
     this.on("ready", () => {
       this.logger.info(chalk`Logged in as {cyan ${(this as Client<true>).user.username}}`);
+      for (const task of this.tasks) {
+        if (task.type.includes("startup")) {
+          task.run(this, "startup");
+        }
+      }
     });
 
     this.on("interactionCreate", interaction => {
@@ -73,6 +107,10 @@ export class Bot extends Client {
     if (this.loggedIn) {
       this.registerQueuedCommands();
     }
+  }
+
+  public addTask(...tasks: Task[]): void {
+    this.tasks.push(...tasks.map(task => ({ ...task, type: Array.isArray(task.type) ? task.type : [task.type] })));
   }
 
   private async registerQueuedCommands(): Promise<void> {

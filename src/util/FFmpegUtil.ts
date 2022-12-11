@@ -13,7 +13,12 @@ export async function toFormat(
 ): Promise<number> {
   let exitCode = 0;
   if (inputPath !== outputPath + "." + format) {
-    exitCode = await asyncProcess(ffmpegPath, ["-i", inputPath, outputPath + "." + format, "-y"], outStream, errStream);
+    exitCode = await asyncProcess(
+      ffmpegPath ?? "ffmpeg",
+      ["-i", inputPath, outputPath + "." + format, "-y"],
+      outStream,
+      errStream
+    );
   }
 
   if (exitCode === 0) {

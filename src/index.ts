@@ -14,6 +14,7 @@ import { ToGifSlashCommand } from "./commands/image/ToGifSlashCommand";
 import { InfoCommand } from "./commands/InfoCommand";
 import { ReminderCommand } from "./commands/ReminderCommand";
 import { DatabaseSchema } from "./DatabaseSchema";
+import { ThreadPingTask } from "./tasks/ThreadPing";
 import { formatBytes } from "./util/Util";
 
 void (async function main() {
@@ -70,6 +71,8 @@ void (async function main() {
     new ToGifSlashCommand(client),
     new ReminderCommand(client)
   );
+
+  client.addTask(ThreadPingTask);
 
   client.login(process.env.DISCORD_API_KEY);
 

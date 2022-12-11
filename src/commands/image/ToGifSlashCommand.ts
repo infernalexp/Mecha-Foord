@@ -195,7 +195,7 @@ export class ToGifSlashCommand extends Command {
       this.logger.debug(chalk`Writing FFMPEG errors to {yellow ${path.relative(process.cwd(), err)}}`);
 
       exitCode = await asyncProcess(
-        ffmpegPath,
+        ffmpegPath ?? "ffmpeg",
         [
           "-filter_complex",
           "[0:v] split [a][b];[a] palettegen=stats_mode=diff [p];[b][p] paletteuse=bayer_scale=1",
